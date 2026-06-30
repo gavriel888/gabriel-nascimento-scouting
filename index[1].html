@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gabriel Nascimento Scouting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=20260630-bg" />
+  </head>
+  <body>
+    <div class="stadium-bg"></div>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-card">
+          <div class="club-badge">CS</div>
+          <div>
+            <h1>Gabriel Nascimento Scouting</h1>
+            <p>Banco de Dados Particular</p>
+          </div>
+        </div>
+        <div class="overall-chip">
+          <span id="totalPlayers">0</span>
+          <small>jogadores</small>
+        </div>
+        <div class="top-actions">
+          <div class="cloud-chip" id="cloudStatus">Local</div>
+          <button class="ghost-btn cloud-btn" id="cloudLoginBtn">Entrar</button>
+          <button class="ghost-btn cloud-btn hidden" id="cloudSyncBtn">Sync</button>
+          <button class="ghost-btn cloud-btn hidden" id="cloudLogoutBtn">Sair</button>
+          <button class="ghost-btn" id="importBtn">Importar</button>
+          <button class="ghost-btn" id="exportBtn">Exportar</button>
+          <button class="ghost-btn" id="compareBtn">Comparar</button>
+          <button class="primary-btn" id="addPlayerBtn">+ Jogador</button>
+        </div>
+      </header>
+
+      <main class="main-layout">
+        <section class="left-panel panel-glass">
+          <div class="scout-title">
+            <span>Relatório do Olheiro</span>
+          </div>
+          <nav class="tabs" id="tabs">
+            <button class="tab active" data-tab="Tudo">Tudo</button>
+            <button class="tab" data-tab="ATA">ATA</button>
+            <button class="tab" data-tab="MEI">MEI</button>
+            <button class="tab" data-tab="DEF">DEF</button>
+            <button class="tab" data-tab="GOL">GOL</button>
+            <button class="tab" data-tab="Indicados">Indicados</button>
+          </nav>
+
+          <div class="filter-row">
+            <input id="searchInput" type="search" placeholder="Pesquisar jogador..." />
+            <select id="statusFilter">
+              <option value="">Status</option>
+              <option>A observar</option>
+              <option>Observando</option>
+              <option>Relatório pronto</option>
+              <option>Monitorar</option>
+              <option>Indicado</option>
+              <option>Descartado</option>
+              <option>Contratado Vasco</option>
+              <option>Perdido para outro clube</option>
+            </select>
+          </div>
+
+          <div class="player-list" id="playerList"></div>
+        </section>
+
+        <aside class="right-panel panel-dark" id="detailPanel">
+          <div class="empty-state">
+            <h2>Nenhum jogador selecionado</h2>
+            <p>Adicione um jogador ou selecione um card na lista.</p>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <div class="modal-backdrop hidden" id="playerModal">
+      <div class="modal large-modal">
+        <div class="modal-header">
+          <h2 id="playerModalTitle">Adicionar jogador</h2>
+          <button class="icon-btn close-modal" data-close="playerModal">×</button>
+        </div>
+        <form id="playerForm" class="form-grid">
+          <input type="hidden" id="playerId" />
+          <label>Nome completo<input id="nome" required /></label>
+          <label>Apelido<input id="apelido" /></label>
+          <label>Ano nasc.<input id="ano_nasc" type="number" min="1990" max="2035" /></label>
+          <label>Data nasc.<input id="data_nasc" type="date" /></label>
+          <label>Clube<input id="clube" /></label>
+          <label>Categoria
+            <select id="categoria">
+              <option>Sub-11</option><option>Sub-12</option><option>Sub-13</option><option>Sub-14</option>
+              <option>Sub-15</option><option>Sub-16</option><option>Sub-17</option><option>Sub-20</option>
+              <option>Profissional</option>
+            </select>
+          </label>
+          <label>Posição
+            <select id="posicao">
+              <option>GOL</option><option>LD</option><option>ZAG</option><option>LE</option>
+              <option>VOL</option><option>MC</option><option>MEI</option><option>PD</option><option>PE</option><option>ATA</option>
+            </select>
+          </label>
+          <label>Pé
+            <select id="pe">
+              <option>Dir.</option><option>Esq.</option><option>Amb.</option>
+            </select>
+          </label>
+          <label>Altura<input id="altura" placeholder="Ex: 172 cm" /></label>
+          <label>Nacionalidade<input id="nacionalidade" placeholder="Ex: Brasil" /></label>
+          <label class="full">Foto do jogador<input id="foto" type="file" accept="image/*" /></label>
+          <label class="full">Observação geral<textarea id="observacao_geral" rows="3"></textarea></label>
+          <div class="modal-actions full">
+            <button type="button" class="ghost-btn close-modal" data-close="playerModal">Cancelar</button>
+            <button type="submit" class="primary-btn">Salvar jogador</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="observationModal">
+      <div class="modal large-modal">
+        <div class="modal-header">
+          <h2 id="observationModalTitle">Adicionar observação</h2>
+          <button class="icon-btn close-modal" data-close="observationModal">×</button>
+        </div>
+        <form id="observationForm" class="form-grid">
+          <input type="hidden" id="obsPlayerId" />
+          <label>Data<input id="obsData" type="date" required /></label>
+          <label>Jogo<input id="obsJogo" placeholder="Ex: Vasco x Flamengo" required /></label>
+          <label>Adversário<input id="obsAdversario" required /></label>
+          <label>Categoria
+            <select id="obsCategoria">
+              <option>Sub-11</option><option>Sub-12</option><option>Sub-13</option><option>Sub-14</option>
+              <option>Sub-15</option><option>Sub-16</option><option>Sub-17</option><option>Sub-20</option>
+              <option>Profissional</option>
+            </select>
+          </label>
+          <div id="attributeFields" class="attribute-form-grid full"></div>
+          <label>Nota geral<input id="nota_geral" type="number" min="0" max="10" step="0.1" value="5" /></label>
+          <label>Nível
+            <select id="nivel"><option>Elite</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+          </label>
+          <label>Projeção
+            <select id="projecao"><option>Alta</option><option>Média</option><option>Baixa</option><option>Sem definição</option></select>
+          </label>
+          <label>Status
+            <select id="status">
+              <option>A observar</option><option>Observando</option><option>Relatório pronto</option><option>Monitorar</option><option>Indicado</option><option>Descartado</option><option>Contratado Vasco</option><option>Perdido para outro clube</option>
+            </select>
+          </label>
+          <label class="full">Relatório<textarea id="relatorio" rows="4" required></textarea></label>
+          <label class="full">Próxima ação<input id="proxima_acao" placeholder="Ex: Ver novamente / Contratar / Monitorar" /></label>
+          <div class="modal-actions full">
+            <button type="button" class="ghost-btn close-modal" data-close="observationModal">Cancelar</button>
+            <button type="submit" class="primary-btn">Salvar observação</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="profileModal">
+      <div class="modal profile-modal">
+        <div class="modal-header">
+          <h2 id="profileTitle">Perfil completo</h2>
+          <button class="icon-btn close-modal" data-close="profileModal">×</button>
+        </div>
+        <div id="profileContent"></div>
+      </div>
+    </div>
+
+
+    <div class="modal-backdrop hidden" id="compareModal">
+      <div class="modal compare-modal">
+        <div class="modal-header">
+          <h2>Comparar atletas</h2>
+          <button class="icon-btn close-modal" data-close="compareModal">×</button>
+        </div>
+        <div class="compare-selectors">
+          <label>Atleta 1<select id="compareA"></select></label>
+          <label>Atleta 2<select id="compareB"></select></label>
+        </div>
+        <div id="compareContent"></div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="cloudModal">
+      <div class="modal cloud-modal">
+        <div class="modal-header">
+          <h2>Conectar Supabase</h2>
+          <button class="icon-btn close-modal" data-close="cloudModal">×</button>
+        </div>
+        <form id="cloudForm" class="form-grid">
+          <label>Email<input id="cloudEmail" type="email" autocomplete="email" required /></label>
+          <label>Senha<input id="cloudPassword" type="password" autocomplete="current-password" required /></label>
+          <div class="cloud-message full" id="cloudMessage">Use o usuario criado no Supabase Auth.</div>
+          <div class="modal-actions full">
+            <button type="button" class="ghost-btn" id="cloudSignupBtn">Criar acesso</button>
+            <button type="submit" class="primary-btn">Entrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <input type="file" id="importFile" accept="application/json" class="hidden" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260630-cloud"></script>
+    <script src="recovered-data.js?v=20260630-3"></script>
+    <script src="app.js?v=20260630-cloud-2"></script>
+  </body>
+</html>
