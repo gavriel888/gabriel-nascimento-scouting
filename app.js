@@ -1350,3 +1350,78 @@ function setupEvents() {
 setupEvents();
 render();
 initCloud();
+async function initLoginGate() {
+  const loginScreen = document.getElementById("loginScreen");
+  const loginForm = document.getElementById("loginGateForm");
+  const loginEmail = document.getElementById("loginEmail");
+  const loginPassword = document.getElementById("loginPassword");
+  const loginMessage = document.getElementById("loginGateMessage");
+
+  if (!loginScreen || !loginForm) return;
+
+  const supabaseClient =
+    window.scoutingSupabase ||
+    window.supabaseClient ||
+    window.sb ||
+    window.client ||
+    null;
+
+  if (!supabaseClient || !supabaseClient.auth) {
+    loginMessage.textContent = "Erro: cliente Supabase não encontrado.";
+    return;
+  }
+
+  const hideLogin = () => {
+    loginScreen.classList.add("hidden");
+  };
+
+  const showLogin = () => {
+    loginScreen.classList.remove("hidden");
+  };
+
+  const { data } = await supabaseClient.auth.getSession();
+
+  if (data && data.session) {
+    hideLogin();
+  } else {
+    showLogin();
+  }
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    loginMessage.textContent = "Autenticando...";
+
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      loginMessage.textContent = "Email ou senha incorretos.";
+      return;
+    }
+
+    loginMessage.textContent = "";
+    hideLogin();
+
+    if (typeof syncWithCloud === "function") {
+      syncWithCloud();
+    }
+  });
+
+  supabaseClient.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_IN") {
+      hideLogin();
+    }
+
+    if (event === "SIGNED_OUT") {
+      showLogin();
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initLoginGate);
