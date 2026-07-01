@@ -210,7 +210,7 @@
     <script src="recovered-data.js?v=20260630-3"></script>
     <script src="app.js?v=20260630-cloud-2"></script>
   </body>
-  <section id="loginScreen" class="login-screen">
+<section id="loginScreen" class="login-screen">
   <div class="terminal-bg">
     <div class="terminal-lines terminal-auth">
       <p>systemctl status scouting-db</p>
@@ -224,7 +224,7 @@
         <p>
           <span class="term-label">email</span>
           <span class="term-sep">:</span>
-          <input id="loginEmail" type="email" autocomplete="username" required>
+          <input id="loginEmail" type="email" autocomplete="username" required autofocus>
         </p>
 
         <p>
@@ -233,10 +233,7 @@
           <input id="loginPassword" type="password" autocomplete="current-password" required>
         </p>
 
-        <p class="term-command-line">
-          <button type="submit" class="term-button">run auth --login</button>
-        </p>
-
+        <p id="loginCommandLine" class="term-command-line">aguardando credenciais...</p>
         <p id="loginGateMessage" class="term-message"></p>
         <p>login<span class="cursor">█</span></p>
       </form>
