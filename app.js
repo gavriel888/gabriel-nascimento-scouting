@@ -1360,13 +1360,6 @@ async function initLoginGate() {
 
   if (!loginScreen || !loginForm) return;
 
-  const supabaseClient =
-    window.scoutingSupabase ||
-    window.supabaseClient ||
-    window.sb ||
-    window.client ||
-    null;
-
   const writeCommand = (text) => {
     if (loginCommandLine) loginCommandLine.textContent = text;
   };
@@ -1386,15 +1379,36 @@ async function initLoginGate() {
     }, 100);
   };
 
-  if (!supabaseClient || !supabaseClient.auth) {
-    writeCommand("auth.client --not-found");
-    writeMessage("Erro: cliente Supabase não encontrado.");
+  let client = null;
+
+  try {
+    writeCommand("supabase.client --loading");
+
+    await loadSupabaseLibrary();
+    client = createCloudClient();
+
+    if (!client || !client.auth) {
+      writeCommand("supabase.client --not-found");
+      writeMessage("Erro: cliente Supabase não encontrado.");
+      return;
+    }
+
+    window.scoutingSupabase = client;
+    window.supabaseClient = client;
+
+    writeCommand("supabase.client --ready");
+  } catch (error) {
+    console.error(error);
+    writeCommand("supabase.client --error");
+    writeMessage("Erro ao carregar Supabase.");
     return;
   }
 
-  const { data } = await supabaseClient.auth.getSession();
+  const { data } = await client.auth.getSession();
 
   if (data && data.session) {
+    cloudUser = data.session.user;
+    updateCloudButtons();
     hideLogin();
   } else {
     showLogin();
@@ -1433,7 +1447,7 @@ async function initLoginGate() {
     writeMessage("");
     writeCommand("auth.signInWithPassword()");
 
-    const { error } = await supabaseClient.auth.signInWithPassword({
+    const { data, error } = await client.auth.signInWithPassword({
       email,
       password
     });
@@ -1444,24 +1458,29 @@ async function initLoginGate() {
       return;
     }
 
+    cloudUser = data.user;
+    updateCloudButtons();
+
     writeCommand("auth.signInWithPassword() --success");
     writeMessage("");
 
-    setTimeout(() => {
+    setTimeout(async () => {
       hideLogin();
 
-      if (typeof syncWithCloud === "function") {
-        syncWithCloud();
+      if (typeof syncFromCloud === "function") {
+        await syncFromCloud({ forceMerge: true });
       }
     }, 600);
   }
 
-  supabaseClient.auth.onAuthStateChange((event) => {
-    if (event === "SIGNED_IN") {
-      hideLogin();
-    }
+  client.auth.onAuthStateChange((_event, session) => {
+    cloudUser = session?.user || null;
+    updateCloudButtons();
 
-    if (event === "SIGNED_OUT") {
+    if (cloudUser) {
+      hideLogin();
+      syncFromCloud({ forceMerge: true });
+    } else {
       showLogin();
     }
   });
