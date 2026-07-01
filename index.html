@@ -210,4 +210,33 @@
     <script src="recovered-data.js?v=20260630-3"></script>
     <script src="app.js?v=20260630-cloud-2"></script>
   </body>
+  <section id="loginScreen" class="login-screen">
+  <div class="terminal-bg">
+    <div class="terminal-lines">
+      <p>systemctl status scouting-db</p>
+      <p>● scouting.service - Gabriel Nascimento Scouting</p>
+      <p>Loaded: loaded (/cloud/supabase/auth.service; enabled)</p>
+      <p>Active: protected (private database)</p>
+      <p>Docs: private scouting database</p>
+      <p>echo "Authentication required"</p>
+      <p>login<span class="cursor">█</span></p>
+    </div>
+
+    <form id="loginGateForm" class="login-box">
+      <h1>Gabriel Nascimento Scouting</h1>
+      <p>Banco de Dados Particular</p>
+
+      <input id="loginEmail" type="email" placeholder="Email" required>
+      <input id="loginPassword" type="password" placeholder="Senha" required>
+
+      <button type="submit">Entrar</button>
+
+      <span id="loginGateMessage"></span>
+    </form>
+
+    <footer class="login-footer">
+      PRIVACY POLICY&nbsp;&nbsp; TERMS OF USE&nbsp;&nbsp; DATABASE ACCESS
+    </footer>
+  </div>
+</section>
 </html>
