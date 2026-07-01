@@ -749,7 +749,6 @@ button { cursor: pointer; border: 0; }
   font-size: 16px;
   line-height: 1.45;
   text-shadow: 0 0 8px rgba(57, 255, 102, 0.65);
-  user-select: none;
   max-width: 900px;
 }
 
@@ -795,20 +794,7 @@ button { cursor: pointer; border: 0; }
 
 .term-command-line {
   margin-top: 10px;
-}
-
-.term-button {
-  background: transparent;
-  border: none;
-  color: #39ff66;
-  font: inherit;
-  cursor: pointer;
-  padding: 0;
-  text-shadow: 0 0 8px rgba(57, 255, 102, 0.65);
-}
-
-.term-button:hover {
-  color: #7dff9d;
+  color: rgba(57, 255, 102, 0.8);
 }
 
 .term-message {
@@ -821,8 +807,13 @@ button { cursor: pointer; border: 0; }
 }
 
 @keyframes blinkCursor {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  0%, 50% {
+    opacity: 1;
+  }
+
+  51%, 100% {
+    opacity: 0;
+  }
 }
 
 .login-footer {
