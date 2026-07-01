@@ -1356,6 +1356,7 @@ async function initLoginGate() {
   const loginEmail = document.getElementById("loginEmail");
   const loginPassword = document.getElementById("loginPassword");
   const loginMessage = document.getElementById("loginGateMessage");
+  const loginCommandLine = document.getElementById("loginCommandLine");
 
   if (!loginScreen || !loginForm) return;
 
@@ -1366,10 +1367,13 @@ async function initLoginGate() {
     window.client ||
     null;
 
-  if (!supabaseClient || !supabaseClient.auth) {
-    loginMessage.textContent = "Erro: cliente Supabase não encontrado.";
-    return;
-  }
+  const writeCommand = (text) => {
+    if (loginCommandLine) loginCommandLine.textContent = text;
+  };
+
+  const writeMessage = (text) => {
+    if (loginMessage) loginMessage.textContent = text;
+  };
 
   const hideLogin = () => {
     loginScreen.classList.add("hidden");
@@ -1377,7 +1381,16 @@ async function initLoginGate() {
 
   const showLogin = () => {
     loginScreen.classList.remove("hidden");
+    setTimeout(() => {
+      if (loginEmail) loginEmail.focus();
+    }, 100);
   };
+
+  if (!supabaseClient || !supabaseClient.auth) {
+    writeCommand("auth.client --not-found");
+    writeMessage("Erro: cliente Supabase não encontrado.");
+    return;
+  }
 
   const { data } = await supabaseClient.auth.getSession();
 
@@ -1387,13 +1400,38 @@ async function initLoginGate() {
     showLogin();
   }
 
+  loginEmail.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      loginPassword.focus();
+      writeCommand("email recebido...");
+    }
+  });
+
+  loginPassword.addEventListener("keydown", async (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      await runTerminalLogin();
+    }
+  });
+
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    await runTerminalLogin();
+  });
 
-    loginMessage.textContent = "Autenticando...";
-
+  async function runTerminalLogin() {
     const email = loginEmail.value.trim();
     const password = loginPassword.value;
+
+    if (!email || !password) {
+      writeCommand("auth.signInWithPassword() --failed");
+      writeMessage("Preencha email e senha.");
+      return;
+    }
+
+    writeMessage("");
+    writeCommand("auth.signInWithPassword()");
 
     const { error } = await supabaseClient.auth.signInWithPassword({
       email,
@@ -1401,17 +1439,22 @@ async function initLoginGate() {
     });
 
     if (error) {
-      loginMessage.textContent = "Email ou senha incorretos.";
+      writeCommand("auth.signInWithPassword() --denied");
+      writeMessage("Acesso negado. Email ou senha incorretos.");
       return;
     }
 
-    loginMessage.textContent = "";
-    hideLogin();
+    writeCommand("auth.signInWithPassword() --success");
+    writeMessage("");
 
-    if (typeof syncWithCloud === "function") {
-      syncWithCloud();
-    }
-  });
+    setTimeout(() => {
+      hideLogin();
+
+      if (typeof syncWithCloud === "function") {
+        syncWithCloud();
+      }
+    }, 600);
+  }
 
   supabaseClient.auth.onAuthStateChange((event) => {
     if (event === "SIGNED_IN") {
